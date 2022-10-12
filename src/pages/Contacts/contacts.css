@@ -1,0 +1,17 @@
+.contacts {
+  height: 100vh;
+  display: grid;
+  place-content: center;
+}
+
+.contactsList {
+  width: 700px;
+}
+
+.contactsButton {
+  margin-top: 10px;
+}
+
+.contactsSearch {
+  margin-bottom: 10px;
+}

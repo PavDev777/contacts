@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import { Alert, Button, Form, Input, Typography } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import './loginForm.css'
+import { useNavigate } from 'react-router-dom'
+import { useAppDispatch } from '../../app/hooks'
+import { logIn } from '../../features/auth/authSlice'
 
 type LoginData = {
   userName: string
@@ -20,13 +23,15 @@ const { Title } = Typography
 export const Login = () => {
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
 
   const onFinish = async ({ userName }: LoginData) => {
     setLoading(true)
     const response = await fetch(
       'https://5fb3db44b6601200168f7fba.mockapi.io/api/users'
     )
-    const users: singleUser[] = await response.json()
+    const users = (await response.json()) as singleUser[]
 
     const findUser = users.find(
       user => user.username.toLowerCase() === userName.toLowerCase()
@@ -37,6 +42,8 @@ export const Login = () => {
     } else {
       setError(false)
       setLoading(false)
+      dispatch(logIn())
+      navigate('/contacts')
     }
   }
 
