@@ -2,24 +2,42 @@ import React, { useEffect, useState } from 'react'
 import { Avatar, Button, List, Typography } from 'antd'
 import './contacts.css'
 import Search from 'antd/es/input/Search'
-
-type ContactItem = {
-  name: string
-  phone: string
-  id: string
-}
+import { useAppDispatch, useAppSelector } from '../../app/hooks'
+import {
+  contactListLoadingSelector,
+  ContactLists,
+  contactListSelector,
+  deleteContact,
+  fetchContacts
+} from '../../features/contact/contactSlice'
+import { AddContactForm } from '../../components/AddContactForm/AddContactForm'
+import { EditForm } from '../../components/EditForm/EditForm'
 
 const { Title } = Typography
 
 export const Contacts = () => {
-  const [contacts, setContacts] = useState<ContactItem[]>([])
-  const [search, setSearch] = useState('')
+  const [isOpenAddForm, setIsOpenAddForm] = useState(false)
+  const [isOpenEditForm, setIsOpenEditForm] = useState(false)
+  const [selectedContact, setIsSelectedContact] = useState<ContactLists | null>(
+    null
+  )
+
+  const dispatch = useAppDispatch()
+  const contactsList = useAppSelector(contactListSelector)
+  const contactsListLoader = useAppSelector(contactListLoadingSelector)
 
   useEffect(() => {
-    fetch('https://634690bf745bd0dbd380a3b5.mockapi.io/contact-list')
-      .then(response => response.json())
-      .then(data => setContacts(data))
-  }, [])
+    dispatch(fetchContacts())
+  }, [dispatch])
+
+  const deleteContactHandler = (id: string) => {
+    dispatch(deleteContact(id))
+  }
+
+  const showEditForm = (contactItem: ContactLists) => {
+    setIsOpenEditForm(true)
+    setIsSelectedContact(contactItem)
+  }
 
   return (
     <div className='contacts'>
@@ -28,18 +46,29 @@ export const Contacts = () => {
         className='contactsSearch'
         placeholder='Search contacts...'
         enterButton
-        onChange={event => setSearch(event.target.value)}
       />
       <List
         bordered
         className='contactsList'
         itemLayout='horizontal'
-        dataSource={contacts}
+        dataSource={contactsList}
+        loading={contactsListLoader}
         renderItem={contact => (
           <List.Item
             actions={[
-              <Button key='list-loadmore-edit'>edit</Button>,
-              <Button key='list-loadmore-edit'>delete</Button>
+              <Button
+                key='list-loadmore-edit'
+                onClick={() => showEditForm(contact)}
+              >
+                Edit
+              </Button>,
+              <Button
+                onClick={() => deleteContactHandler(contact.id)}
+                key='list-loadmore-edit'
+                danger
+              >
+                Delete
+              </Button>
             ]}
           >
             <List.Item.Meta
@@ -50,9 +79,26 @@ export const Contacts = () => {
           </List.Item>
         )}
       />
-      <Button className='contactsButton' type='primary'>
+      <Button
+        className='contactsButton'
+        type='primary'
+        onClick={() => setIsOpenAddForm(true)}
+      >
         Add new contact
       </Button>
+      {isOpenAddForm && (
+        <AddContactForm
+          isOpenModal={isOpenAddForm}
+          closeModal={() => setIsOpenAddForm(false)}
+        />
+      )}
+      {isOpenEditForm && (
+        <EditForm
+          selectedContact={selectedContact}
+          isOpenModal={isOpenEditForm}
+          closeModal={() => setIsOpenEditForm(false)}
+        />
+      )}
     </div>
   )
 }

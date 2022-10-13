@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { RootState } from '../../app/store'
 
 export type UserItem = {
@@ -17,7 +17,7 @@ export interface IUserState {
 }
 
 const initialState: IUserState = {
-  data: null,
+  data: JSON.parse(localStorage.getItem('user') || '{}'),
   status: 'idle'
 }
 
@@ -28,8 +28,8 @@ export const fetchUsers = createAsyncThunk(
       const response = await fetch(
         `https://5fb3db44b6601200168f7fba.mockapi.io/api/users?username=${username}`
       )
-      const user = (await response.json()) as UserItem[]
-      return user
+
+      return (await response.json()) as UserItem[]
     } catch (err) {
       return rejectWithValue(err)
     }
@@ -45,12 +45,11 @@ export const userSlice = createSlice({
       state.status = 'loading'
     })
     builder.addCase(fetchUsers.fulfilled, (state, action) => {
-      // if (action.payload) {
-      //   state.status = 'success'
-      //   state.data = action.payload
-      // }
-
-      state.data = action.payload[0]
+      if (action.payload[0]) {
+        state.status = 'success'
+        state.data = action.payload[0]
+        localStorage.setItem('user', JSON.stringify(action.payload[0]))
+      }
     })
     builder.addCase(fetchUsers.rejected, (state, action) => {
       state.status = 'failed'
@@ -61,5 +60,6 @@ export const userSlice = createSlice({
 export const {} = userSlice.actions
 
 export const selectUserData = (state: RootState) => state.user.data
+export const selectStatus = (state: RootState) => state.user.status
 
 export default userSlice.reducer
