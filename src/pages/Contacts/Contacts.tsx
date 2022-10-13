@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { Avatar, Button, List, Typography } from 'antd'
 import './contacts.css'
-import Search from 'antd/es/input/Search'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import {
   contactListLoadingSelector,
   ContactLists,
   contactListSelector,
   deleteContact,
-  fetchContacts
+  fetchContacts,
+  searchContactsSelector
 } from '../../features/contact/contactSlice'
 import { AddContactForm } from '../../components/AddContactForm/AddContactForm'
 import { EditForm } from '../../components/EditForm/EditForm'
+import { SearchContacts } from '../../components/SearchContacts/SearchContacts'
 
 const { Title } = Typography
 
@@ -21,10 +22,16 @@ export const Contacts = () => {
   const [selectedContact, setIsSelectedContact] = useState<ContactLists | null>(
     null
   )
-
-  const dispatch = useAppDispatch()
   const contactsList = useAppSelector(contactListSelector)
   const contactsListLoader = useAppSelector(contactListLoadingSelector)
+  const dispatch = useAppDispatch()
+  const search = useAppSelector(searchContactsSelector)
+  const filteredSearch = contactsList.filter(contact => {
+    return (
+      contact.name.toLowerCase().includes(search) ||
+      contact.phone.toLowerCase().includes(search)
+    )
+  })
 
   useEffect(() => {
     dispatch(fetchContacts())
@@ -42,16 +49,12 @@ export const Contacts = () => {
   return (
     <div className='contacts'>
       <Title>Contacts List</Title>
-      <Search
-        className='contactsSearch'
-        placeholder='Search contacts...'
-        enterButton
-      />
+      <SearchContacts />
       <List
         bordered
         className='contactsList'
         itemLayout='horizontal'
-        dataSource={contactsList}
+        dataSource={filteredSearch}
         loading={contactsListLoader}
         renderItem={contact => (
           <List.Item

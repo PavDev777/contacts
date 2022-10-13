@@ -1,10 +1,11 @@
-import { Button, Form, Input, Typography } from 'antd'
+import { Alert, Button, Form, Input, Typography } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import './loginForm.css'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { logIn } from '../../features/auth/authSlice'
 import { fetchUsers, selectStatus } from '../../features/user/userSlice'
+import { useState } from 'react'
 
 type LoginData = {
   userName: string
@@ -13,44 +14,29 @@ type LoginData = {
 const { Title } = Typography
 
 export const Login = () => {
+  const [error, setError] = useState(false)
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const status = useAppSelector(selectStatus)
 
   const onFinish = async ({ userName }: LoginData) => {
     const isUserFound = await dispatch(fetchUsers(userName)).unwrap()
-    const findUser = isUserFound.find(user => user.username === userName)
+    const findUser = isUserFound.find(
+      user => user.username.toLowerCase() === userName.toLowerCase()
+    )
 
     try {
       if (findUser) {
         dispatch(logIn())
+        setError(false)
         navigate('/contacts')
       } else {
         console.log('не существует')
+        setError(true)
       }
     } catch (error) {
       console.log(error)
     }
-
-    // setLoading(true)
-    // dispatch(fetchUsers(userName))
-    // const response = await fetch(
-    //   'https://5fb3db44b6601200168f7fba.mockapi.io/api/users'
-    // )
-    // const users = (await response.json()) as singleUser[]
-    //
-    // const findUser = users.find(
-    //   user => user.username.toLowerCase() === userName.toLowerCase()
-    // )
-    // if (!findUser) {
-    //   setError(true)
-    //   setLoading(false)
-    // } else {
-    //   setError(false)
-    //   setLoading(false)
-    //   dispatch(logIn())
-    //   navigate('/contacts')
-    // }
   }
 
   return (
@@ -90,14 +76,14 @@ export const Login = () => {
           Log In
         </Button>
       </Form.Item>
-      {/*{error && (*/}
-      {/*  <Alert*/}
-      {/*    message='Error'*/}
-      {/*    description='Username cant be find'*/}
-      {/*    type='error'*/}
-      {/*    showIcon*/}
-      {/*  />*/}
-      {/*)}*/}
+      {error && (
+        <Alert
+          message='Error'
+          description='Username cant be find'
+          type='error'
+          showIcon
+        />
+      )}
     </Form>
   )
 }

@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '../../app/store'
 import { AddFormValues } from '../../components/AddContactForm/AddContactForm'
 
@@ -11,11 +11,13 @@ export type ContactLists = {
 interface ContactsState {
   contactList: ContactLists[]
   loading: boolean
+  searchContacts: string
 }
 
 const initialState: ContactsState = {
   contactList: [],
-  loading: false
+  loading: false,
+  searchContacts: ''
 }
 
 export const fetchContacts = createAsyncThunk('fetchContacts', async () => {
@@ -51,7 +53,23 @@ export const addContact = createAsyncThunk(
         body: JSON.stringify(newContact)
       }
     )
+    return (await response.json()) as ContactLists
+  }
+)
 
+export const editContact = createAsyncThunk(
+  'editContact',
+  async (contactEdited: ContactLists) => {
+    const response = await fetch(
+      `https://634690bf745bd0dbd380a3b5.mockapi.io/contact-list/${contactEdited.id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(contactEdited)
+      }
+    )
     return (await response.json()) as ContactLists
   }
 )
@@ -59,7 +77,11 @@ export const addContact = createAsyncThunk(
 export const contactsSlice = createSlice({
   name: 'contacts',
   initialState,
-  reducers: {},
+  reducers: {
+    searchContact: (state, action: PayloadAction<string>) => {
+      state.searchContacts = action.payload
+    }
+  },
   extraReducers: builder => {
     builder.addCase(fetchContacts.pending, state => {
       state.loading = true
@@ -79,7 +101,7 @@ export const contactsSlice = createSlice({
       )
       state.loading = false
     })
-    builder.addCase(addContact.pending, (state, action) => {
+    builder.addCase(addContact.pending, state => {
       state.loading = true
     })
     builder.addCase(addContact.fulfilled, (state, action) => {
@@ -88,14 +110,30 @@ export const contactsSlice = createSlice({
         state.loading = false
       }
     })
+    builder.addCase(editContact.pending, state => {
+      state.loading = true
+    })
+    builder.addCase(editContact.fulfilled, (state, action) => {
+      if (action.payload) {
+        state.contactList = state.contactList.map(contact => {
+          if (contact.id === action.payload.id) {
+            return action.payload
+          }
+          return contact
+        })
+        state.loading = false
+      }
+    })
   }
 })
 
-export const {} = contactsSlice.actions
+export const { searchContact } = contactsSlice.actions
 
 export const contactListSelector = (state: RootState) =>
   state.contacts.contactList
 export const contactListLoadingSelector = (state: RootState) =>
   state.contacts.loading
+export const searchContactsSelector = (state: RootState) =>
+  state.contacts.searchContacts
 
 export default contactsSlice.reducer

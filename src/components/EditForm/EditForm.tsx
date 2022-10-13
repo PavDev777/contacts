@@ -1,7 +1,12 @@
 import React from 'react'
 import { Button, Form, Input, Modal } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import { ContactLists } from '../../features/contact/contactSlice'
+import {
+  contactListLoadingSelector,
+  ContactLists,
+  editContact
+} from '../../features/contact/contactSlice'
+import { useAppDispatch, useAppSelector } from '../../app/hooks'
 
 type EditFormProps = {
   isOpenModal: boolean
@@ -9,12 +14,31 @@ type EditFormProps = {
   selectedContact: ContactLists | null
 }
 
+type EditFormValues = {
+  name: string
+  phone: string
+}
+
 export const EditForm = ({
   isOpenModal,
   closeModal,
   selectedContact
 }: EditFormProps) => {
-  const onFinish = () => {}
+  const dispatch = useAppDispatch()
+  const contactListLoading = useAppSelector(contactListLoadingSelector)
+
+  const onFinish = async ({ name, phone }: EditFormValues) => {
+    if (selectedContact) {
+      await dispatch(
+        editContact({
+          ...selectedContact,
+          name,
+          phone
+        })
+      )
+    }
+    closeModal()
+  }
 
   return (
     <Modal
@@ -55,6 +79,7 @@ export const EditForm = ({
             type='primary'
             htmlType='submit'
             className='login-form-button'
+            loading={contactListLoading}
           >
             Edit
           </Button>
