@@ -2,9 +2,9 @@ import { Button } from 'antd'
 import styled from './header.module.scss'
 import { LogoutOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
-import { logOut } from '../../features/auth/authSlice'
-import { selectUserData } from '../../features/user/userSlice'
-import {useNavigate} from "react-router-dom";
+import { logOut } from '../../redux/slices/auth/authSlice'
+import { useNavigate } from 'react-router-dom'
+import { selectUserData } from '../../redux/slices/user/selectors'
 
 export const Header = () => {
   const dispatch = useAppDispatch()

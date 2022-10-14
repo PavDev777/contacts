@@ -1,6 +1,6 @@
 import React from 'react'
 import Search from 'antd/es/input/Search'
-import { searchContact } from '../../features/contact/contactSlice'
+import { searchContact } from '../../redux/slices/contacts/contactSlice'
 import { useAppDispatch } from '../../app/hooks'
 
 export const SearchContacts = () => {

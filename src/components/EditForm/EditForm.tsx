@@ -1,23 +1,11 @@
 import React from 'react'
 import { Button, Form, Input, Modal } from 'antd'
-import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import {
-  contactListLoadingSelector,
-  ContactLists,
-  editContact
-} from '../../features/contact/contactSlice'
+import { UserOutlined } from '@ant-design/icons'
+import { editContact } from '../../redux/slices/contacts/contactSlice'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
-
-type EditFormProps = {
-  isOpenModal: boolean
-  closeModal: () => void
-  selectedContact: ContactLists | null
-}
-
-type EditFormValues = {
-  name: string
-  phone: string
-}
+import { EditFormProps, EditFormValues } from './types'
+import { contactListLoadingSelector } from '../../redux/slices/contacts/selectors'
+import { IMaskInput } from 'react-imask'
 
 export const EditForm = ({
   isOpenModal,
@@ -68,11 +56,12 @@ export const EditForm = ({
           name='phone'
           rules={[{ required: true, message: 'Please input phone number' }]}
         >
-          <Input
-            prefix={<LockOutlined className='site-form-item-icon' />}
-            placeholder='Phone'
-            type='number'
-          />
+          {/*<Input*/}
+          {/*  prefix={<LockOutlined className='site-form-item-icon' />}*/}
+          {/*  placeholder='Phone'*/}
+          {/*  type='number'*/}
+          {/*/>*/}
+          <IMaskInput mask={'+{7}(000)000-00-00'} />
         </Form.Item>
         <Form.Item>
           <Button

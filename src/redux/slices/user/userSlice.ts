@@ -1,24 +1,10 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { RootState } from '../../app/store'
-
-export type UserItem = {
-  name: string
-  username: string
-  email: string
-  avatar: string
-  id: string
-}
-
-type Status = 'idle' | 'loading' | 'failed' | 'success'
-
-export interface IUserState {
-  data: UserItem | null
-  status: Status
-}
+import { IUserState, UserItem } from './types'
 
 const initialState: IUserState = {
   data: JSON.parse(localStorage.getItem('user') || '{}'),
-  status: 'idle'
+  loading: false,
+  status: ''
 }
 
 export const fetchUsers = createAsyncThunk(
@@ -28,10 +14,12 @@ export const fetchUsers = createAsyncThunk(
       const response = await fetch(
         `https://5fb3db44b6601200168f7fba.mockapi.io/api/users?username=${username}`
       )
-
+      if (!response.ok) {
+        throw new Error('Server error')
+      }
       return (await response.json()) as UserItem[]
-    } catch (err) {
-      return rejectWithValue(err)
+    } catch (error) {
+      if (error instanceof Error) return rejectWithValue(error.message)
     }
   }
 )
@@ -42,24 +30,23 @@ export const userSlice = createSlice({
   reducers: {},
   extraReducers: builder => {
     builder.addCase(fetchUsers.pending, state => {
-      state.status = 'loading'
+      state.loading = true
     })
     builder.addCase(fetchUsers.fulfilled, (state, action) => {
-      if (action.payload[0]) {
-        state.status = 'success'
+      if (action.payload) {
         state.data = action.payload[0]
-        localStorage.setItem('user', JSON.stringify(action.payload[0]))
+        localStorage.setItem(
+          'user',
+          JSON.stringify(action.payload[0] ? action.payload[0] : '{}')
+        )
       }
+      state.loading = false
     })
     builder.addCase(fetchUsers.rejected, (state, action) => {
-      state.status = 'failed'
+      state.loading = false
+      state.status = action.payload
     })
   }
 })
-
-export const {} = userSlice.actions
-
-export const selectUserData = (state: RootState) => state.user.data
-export const selectStatus = (state: RootState) => state.user.status
 
 export default userSlice.reducer

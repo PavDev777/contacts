@@ -1,9 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { RootState } from '../../app/store'
-
-export type AuthState = {
-  isLoggedIn: boolean
-}
+import { AuthState } from './types'
 
 const initialState: AuthState = {
   isLoggedIn: JSON.parse(localStorage.getItem('isLoggedIn')!)
@@ -26,7 +22,5 @@ export const authSlice = createSlice({
 })
 
 export const { logIn, logOut } = authSlice.actions
-
-export const isLogged = (state: RootState) => state.auth.isLoggedIn
 
 export default authSlice.reducer

@@ -1,18 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { RootState } from '../../app/store'
-import { AddFormValues } from '../../components/AddContactForm/AddContactForm'
-
-export type ContactLists = {
-  name: string
-  phone: string
-  id: string
-}
-
-interface ContactsState {
-  contactList: ContactLists[]
-  loading: boolean
-  searchContacts: string
-}
+import { AddFormValues } from '../../../components/AddContactForm/types'
+import { ContactLists, ContactsState } from './types'
 
 const initialState: ContactsState = {
   contactList: [],
@@ -86,14 +74,21 @@ export const contactsSlice = createSlice({
     builder.addCase(fetchContacts.pending, state => {
       state.loading = true
     })
+    builder.addCase(deleteContact.pending, (state, action) => {
+      state.loading = true
+    })
+    builder.addCase(addContact.pending, state => {
+      state.loading = true
+    })
+    builder.addCase(editContact.pending, state => {
+      state.loading = true
+    })
+
     builder.addCase(fetchContacts.fulfilled, (state, { payload }) => {
       if (payload) {
         state.contactList = payload
         state.loading = false
       }
-    })
-    builder.addCase(deleteContact.pending, (state, action) => {
-      state.loading = true
     })
     builder.addCase(deleteContact.fulfilled, (state, action) => {
       state.contactList = state.contactList.filter(
@@ -101,17 +96,11 @@ export const contactsSlice = createSlice({
       )
       state.loading = false
     })
-    builder.addCase(addContact.pending, state => {
-      state.loading = true
-    })
     builder.addCase(addContact.fulfilled, (state, action) => {
       if (action.payload) {
         state.contactList.push(action.payload)
         state.loading = false
       }
-    })
-    builder.addCase(editContact.pending, state => {
-      state.loading = true
     })
     builder.addCase(editContact.fulfilled, (state, action) => {
       if (action.payload) {
@@ -128,12 +117,5 @@ export const contactsSlice = createSlice({
 })
 
 export const { searchContact } = contactsSlice.actions
-
-export const contactListSelector = (state: RootState) =>
-  state.contacts.contactList
-export const contactListLoadingSelector = (state: RootState) =>
-  state.contacts.loading
-export const searchContactsSelector = (state: RootState) =>
-  state.contacts.searchContacts
 
 export default contactsSlice.reducer

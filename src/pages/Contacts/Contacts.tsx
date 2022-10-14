@@ -2,17 +2,19 @@ import React, { useEffect, useState } from 'react'
 import { Avatar, Button, List, Typography } from 'antd'
 import './contacts.css'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
+import { AddContactForm } from '../../components/AddContactForm/'
+import { EditForm } from '../../components/EditForm/'
+import { SearchContacts } from '../../components/SearchContacts/'
+import { ContactLists } from '../../redux/slices/contacts/types'
 import {
   contactListLoadingSelector,
-  ContactLists,
   contactListSelector,
-  deleteContact,
-  fetchContacts,
   searchContactsSelector
-} from '../../features/contact/contactSlice'
-import { AddContactForm } from '../../components/AddContactForm/AddContactForm'
-import { EditForm } from '../../components/EditForm/EditForm'
-import { SearchContacts } from '../../components/SearchContacts/SearchContacts'
+} from '../../redux/slices/contacts/selectors'
+import {
+  deleteContact,
+  fetchContacts
+} from '../../redux/slices/contacts/contactSlice'
 
 const { Title } = Typography
 
@@ -29,7 +31,7 @@ export const Contacts = () => {
   const filteredSearch = contactsList.filter(contact => {
     return (
       contact.name.toLowerCase().includes(search) ||
-      contact.phone.toLowerCase().includes(search)
+      contact.phone.toLowerCase().replaceAll('-', '').includes(search)
     )
   })
 
@@ -89,12 +91,14 @@ export const Contacts = () => {
       >
         Add new contact
       </Button>
+
       {isOpenAddForm && (
         <AddContactForm
           isOpenModal={isOpenAddForm}
           closeModal={() => setIsOpenAddForm(false)}
         />
       )}
+
       {isOpenEditForm && (
         <EditForm
           selectedContact={selectedContact}

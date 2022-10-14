@@ -1,12 +1,12 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { Contacts } from './pages/Contacts/Contacts'
-import { Login } from './pages/Login/Login'
+import { Login } from './pages/Login'
 import { useAppSelector } from './app/hooks'
-import { isLogged } from './features/auth/authSlice'
 import { Header } from './components/Header'
+import { isLoggedSelector } from './redux/slices/auth/selectors'
+import { Contacts } from './pages/Contacts'
 
 function App() {
-  const isLoggedIn = useAppSelector(isLogged)
+  const isLoggedIn = useAppSelector(isLoggedSelector)
 
   return (
     <div className='App'>

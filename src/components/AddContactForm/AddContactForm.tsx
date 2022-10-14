@@ -1,27 +1,16 @@
 import React from 'react'
 import { Button, Form, Input, Modal } from 'antd'
-import { LockOutlined, UserOutlined } from '@ant-design/icons'
+import { UserOutlined } from '@ant-design/icons'
 import { useAppDispatch } from '../../app/hooks'
-import {
-  addContact,
-  contactListLoadingSelector
-} from '../../features/contact/contactSlice'
+import { addContact } from '../../redux/slices/contacts/contactSlice'
 import { useSelector } from 'react-redux'
-
-type AddFormContact = {
-  isOpenModal: boolean
-  closeModal: () => void
-}
-
-export type AddFormValues = {
-  name: string
-  phone: string
-}
+import { AddFormContact, AddFormValues } from './types'
+import { contactListLoadingSelector } from '../../redux/slices/contacts/selectors'
+import { IMaskInput } from 'react-imask'
 
 export const AddContactForm = ({ isOpenModal, closeModal }: AddFormContact) => {
   const dispatch = useAppDispatch()
   const contactListLoading = useSelector(contactListLoadingSelector)
-
   const onFinish = async ({ name, phone }: AddFormValues) => {
     await dispatch(
       addContact({
@@ -31,6 +20,7 @@ export const AddContactForm = ({ isOpenModal, closeModal }: AddFormContact) => {
     )
     closeModal()
   }
+
   return (
     <Modal
       title='Add contact'
@@ -56,11 +46,11 @@ export const AddContactForm = ({ isOpenModal, closeModal }: AddFormContact) => {
           name='phone'
           rules={[{ required: true, message: 'Please input phone number' }]}
         >
-          <Input
-            prefix={<LockOutlined className='site-form-item-icon' />}
-            placeholder='Phone'
-            type='number'
-          />
+          {/*<Input*/}
+          {/*  prefix={<LockOutlined className='site-form-item-icon' />}*/}
+          {/*  placeholder='Phone'*/}
+          {/*/>*/}
+          <IMaskInput mask={'+{7}(000)000-00-00'} />
         </Form.Item>
         <Form.Item>
           <Button
@@ -72,14 +62,6 @@ export const AddContactForm = ({ isOpenModal, closeModal }: AddFormContact) => {
             Add
           </Button>
         </Form.Item>
-        {/*{error && (*/}
-        {/*  <Alert*/}
-        {/*    message='Error'*/}
-        {/*    description='Username cant be find'*/}
-        {/*    type='error'*/}
-        {/*    showIcon*/}
-        {/*  />*/}
-        {/*)}*/}
       </Form>
     </Modal>
   )

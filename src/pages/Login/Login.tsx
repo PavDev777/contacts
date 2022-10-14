@@ -3,13 +3,11 @@ import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import './loginForm.css'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
-import { logIn } from '../../features/auth/authSlice'
-import { fetchUsers, selectStatus } from '../../features/user/userSlice'
+import { logIn } from '../../redux/slices/auth/authSlice'
+import { fetchUsers } from '../../redux/slices/user/userSlice'
 import { useState } from 'react'
-
-type LoginData = {
-  userName: string
-}
+import { selectLoading } from '../../redux/slices/user/selectors'
+import { LoginData } from './type'
 
 const { Title } = Typography
 
@@ -17,25 +15,20 @@ export const Login = () => {
   const [error, setError] = useState(false)
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const status = useAppSelector(selectStatus)
+  const loading = useAppSelector(selectLoading)
 
   const onFinish = async ({ userName }: LoginData) => {
     const isUserFound = await dispatch(fetchUsers(userName)).unwrap()
-    const findUser = isUserFound.find(
+    const findUser = isUserFound?.find(
       user => user.username.toLowerCase() === userName.toLowerCase()
     )
 
-    try {
-      if (findUser) {
-        dispatch(logIn())
-        setError(false)
-        navigate('/contacts')
-      } else {
-        console.log('не существует')
-        setError(true)
-      }
-    } catch (error) {
-      console.log(error)
+    if (findUser) {
+      dispatch(logIn())
+      setError(false)
+      navigate('/contacts')
+    } else {
+      setError(true)
     }
   }
 
@@ -68,7 +61,7 @@ export const Login = () => {
       </Form.Item>
       <Form.Item>
         <Button
-          loading={status === 'loading'}
+          loading={loading}
           type='primary'
           htmlType='submit'
           className='login-form-button'
@@ -79,7 +72,7 @@ export const Login = () => {
       {error && (
         <Alert
           message='Error'
-          description='Username cant be find'
+          description='Username can,t be find'
           type='error'
           showIcon
         />
